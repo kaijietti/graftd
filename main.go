@@ -10,14 +10,16 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/kaijietti/graftd/utils"
+
 	"github.com/kaijietti/graftd/httpd"
 	"github.com/kaijietti/graftd/store"
 )
 
 // Command line defaults
-const (
-	DefaultHTTPAddr = "127.0.0.1:11001"
-	DefaultRaftAddr = "127.0.0.1:12000"
+var (
+	DefaultHTTPAddr = "0.0.0.0:11000"
+	DefaultRaftAddr = fmt.Sprintf("%s:12000", utils.GetLocalIP())
 )
 
 var (
