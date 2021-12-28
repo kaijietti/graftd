@@ -55,6 +55,18 @@ sudo sudo docker run -it -P --name nodee -h nodee --net mynet raft-demo /raftexa
 sudo sudo docker run -it -P --name noder -h noder --net mynet raft-demo /raftexample -id noder -join nodew:11000 ~/noder
 ```
 
+## logs viz
+
+we need to modify our `hashicorp/raft` source code to add more custom logs:
+
+```bash
+go mod vendor
+# to build with local vendor 
+go build -mod vendor
+```
+
+now we can add our custom log to the source code.
+
 ## test something
 
 ### test node crash
