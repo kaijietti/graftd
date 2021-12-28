@@ -56,7 +56,7 @@ sudo sudo docker run -it -P --name nodee -h nodee --net mynet raft-demo /raftexa
 sudo sudo docker run -it -P --name noder -h noder --net mynet raft-demo /raftexample -id noder -join nodew:11000 ~/noder
 ```
 
-## logs viz
+## logs aggr & viz
 
 we need to modify our `hashicorp/raft` source code to add more custom logs:
 
@@ -66,7 +66,19 @@ go mod vendor
 go build -mod vendor
 ```
 
-now we can add our custom log to the source code.
+logs aggr tools: https://github.com/AliyunContainerService/log-pilot
+
+```bash
+container_1 log ----
+                    |
+container_2 log ------ log-pilot --> (kafka?) --> viz consumer
+                    |
+container_x log ----
+```
+
+now we can add our custom log to the source code (TODO, refs: raft-example).
+
+
 
 ## test something
 
