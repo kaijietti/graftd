@@ -41,6 +41,7 @@ func init() {
 
 func main() {
 	fmt.Println("hello world")
+	fmt.Println(DefaultRaftAddr)
 
 	flag.Parse()
 

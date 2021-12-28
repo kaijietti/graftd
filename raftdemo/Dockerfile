@@ -11,4 +11,4 @@ RUN go mod download
 
 COPY *.go ./
 
-RUN go build -o /raftexample
+RUN go build -o /raftexample main.go 
