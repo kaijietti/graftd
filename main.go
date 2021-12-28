@@ -10,10 +10,9 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/kaijietti/graftd/utils"
-
 	"github.com/kaijietti/graftd/httpd"
 	"github.com/kaijietti/graftd/store"
+	"github.com/kaijietti/graftd/utils"
 )
 
 // Command line defaults

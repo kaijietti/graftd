@@ -1,11 +1,10 @@
-module raftexample
+module github.com/kaijietti/graftd
 
 go 1.17
 
 require (
 	github.com/hashicorp/raft v1.3.2
 	github.com/hashicorp/raft-boltdb v0.0.0-20211202195631-7d34b9fb3f42
-	github.com/kaijietti/graftd v0.0.0-20211227172231-5c3842733af8
 )
 
 require (
