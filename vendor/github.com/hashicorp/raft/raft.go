@@ -370,7 +370,7 @@ func (r *Raft) setupLeaderState() {
 // runLeader runs the FSM for a leader. Do the setup here and drop into
 // the leaderLoop for the hot loop.
 func (r *Raft) runLeader() {
-	r.logger.Info("entering leader state", "leader", r)
+	r.logger.Info("[kaijie]entering leader state", "leader", r)
 	metrics.IncrCounter([]string{"raft", "state", "leader"}, 1)
 
 	// Notify that we are the leader
