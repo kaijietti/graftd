@@ -39,9 +39,9 @@ sudo docker run -it --name raft-cli -h raft-cli --net mynet raft-client bash
 ```
 
 make request (inside client):
-```shell
-root@raft-cli2:/# curl -XPOST http://noder:11000/key -d '{"user":"kj"}'
-root@raft-cli2:/# curl http://noder:11000/key/user                     
+```
+root@raft-cli:/# curl -XPOST http://noder:11000/key -d '{"user":"kj"}'
+root@raft-cli:/# curl http://noder:11000/key/user                     
 {"user":"kj"}
 ```
 
@@ -68,7 +68,7 @@ TODO
 
 ## Q&A
 
-### why `func GetLocalIP() string` is need?
+### why `func GetLocalIP() string` is needed?
 
 refs: https://github.com/hashicorp/raft/issues/438
 
