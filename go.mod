@@ -1,11 +1,6 @@
-module github.com/kaijietti/graftd
+module graftd
 
 go 1.17
-
-replace (
-	github.com/hashicorp/raft => ./vendor/github.com/hashicorp/raft
-	github.com/hashicorp/raft-boltdb => ./vendor/github.com/hashicorp/raft-boltdb
-)
 
 require (
 	github.com/hashicorp/raft v1.3.2
@@ -21,4 +16,3 @@ require (
 	github.com/hashicorp/golang-lru v0.5.0 // indirect
 	golang.org/x/sys v0.0.0-20200122134326-e047566fdf82 // indirect
 )
-

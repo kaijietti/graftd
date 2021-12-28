@@ -6,13 +6,14 @@ build raft-backend key-value store:
 
 ```shell
 git clone https://github.com/kaijietti/graftd.git
-cd ./graftd/raftexample
+cd ./graftd
 sudo docker build --tag raft-demo .
 ```
 
 build client(TODO: cli now is simply a curl tool):
 
 ```shell
+# git clone https://github.com/kaijietti/graftd.git
 cd ./graftd/client
 sudo docker build --tag raft-client .
 ```
