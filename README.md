@@ -71,14 +71,33 @@ logs aggr tools: https://github.com/AliyunContainerService/log-pilot
 ```bash
 container_1 log ----
                     |
-container_2 log ------ log-pilot --> (kafka?) --> viz consumer
+container_2 log ------ log-pilot --> (logstash + plugin) --> viz consumer
                     |
 container_x log ----
 ```
 
+how to combine logs?
+
+```
+# start logstash
+sudo docker run -it -P --name logstash-1 -h logstash-1 --net mynet docker.elastic.co/logstash/logstash:7.16.2
+
+# start log-pilot
+sudo docker run --rm -it -P --net mynet \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /etc/localtime:/etc/localtime \
+    -v /:/host:ro \
+    --cap-add SYS_ADMIN \
+    -e LOGGING_OUTPUT=logstash \
+    -e LOGSTASH_HOST=logstash-1 \
+    -e LOGSTASH_PORT=5044 \
+    registry.cn-hangzhou.aliyuncs.com/acs/log-pilot:0.9.5-filebeat
+
+# start raft-nodes (with label) 
+sudo docker run -it -P --name nodei -h nodei --net mynet --label aliyun.logs.catalina=stdout  raft-demo /raftexample -id nodei ~/nodei
+```
+
 now we can add our custom log to the source code (TODO, refs: raft-example).
-
-
 
 ## test something
 
@@ -89,7 +108,6 @@ TODO
 ### test split brain
 
 TODO
-
 
 ## Q&A
 
