@@ -43,5 +43,7 @@ sudo docker run --rm -it -P --net mynet \
 
 start graft node(s):
 ```
-sudo docker run -it -P --name node0 -h node0 --net mynet --label aliyun.logs.catalina=stdout  raft-demo /raftexample -id node0 ~/node0
+sudo docker run -it --rm -P --name node0 -h node0 --net mynet --label aliyun.logs.catalina=stdout  raft-demo /raftexample -id node0 ~/node0
+
+sudo docker run -it --rm -P --name node1 -h node1 --net mynet --label aliyun.logs.catalina=stdout  raft-demo /raftexample -id node1 ~/node1
 ```
