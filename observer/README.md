@@ -20,7 +20,7 @@ sudo docker build --tag vizor .
 
 start receiver:
 ```
-sudo docker run -it --rm --name vizor --net mynet -P recv-demo /vizor
+sudo docker run -it --rm --name vizor --net mynet -P vizor /vizor
 ```
 
 start logstash:
