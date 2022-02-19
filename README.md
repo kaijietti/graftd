@@ -31,7 +31,7 @@ sudo docker network create --driver bridge --subnet 192.168.0.0/16 --gateway 192
 start a leader node:
 
 ```shell
-sudo sudo docker run -it -P --name nodew -h nodew --net mynet raft-demo /raftexample -id nodew ~/nodew
+sudo sudo docker run -it -P --name node0 -h node0 --net mynet raft-demo /raftexample -id node0 ~/node0
 ```
 
 start client:
@@ -41,8 +41,8 @@ sudo docker run -it --name raft-cli -h raft-cli --net mynet raft-client bash
 
 make request (inside client):
 ```
-root@raft-cli:/# curl -XPOST http://noder:11000/key -d '{"user":"kj"}'
-root@raft-cli:/# curl http://noder:11000/key/user                     
+root@raft-cli:/# curl -XPOST http://node0:11000/key -d '{"user":"kj"}'
+root@raft-cli:/# curl http://node0:11000/key/user                     
 {"user":"kj"}
 ```
 
@@ -51,9 +51,9 @@ root@raft-cli:/# curl http://noder:11000/key/user
 key: use `join` parameter to join a new follower node to a leader node
 
 ```shell
-sudo sudo docker run -it -P --name nodee -h nodee --net mynet raft-demo /raftexample -id nodee -join nodew:11000 ~/nodee
+sudo sudo docker run -it -P --name node1 -h node1 --net mynet raft-demo /raftexample -id node1 -join nodew:11000 ~/node1
 
-sudo sudo docker run -it -P --name noder -h noder --net mynet raft-demo /raftexample -id noder -join nodew:11000 ~/noder
+sudo sudo docker run -it -P --name node2 -h node2 --net mynet raft-demo /raftexample -id node2 -join nodew:11000 ~/node2
 ```
 
 ## logs aggr & viz

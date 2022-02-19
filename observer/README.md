@@ -20,12 +20,12 @@ sudo docker build --tag vizor .
 
 start receiver:
 ```
-sudo docker run -it --rm --name vizor --net mynet -P vizor /vizor
+sudo docker run --rm -it --name vizor --net mynet -P vizor /vizor
 ```
 
 start logstash:
 ```
-sudo docker run -it -P --name logstash-http -h logstash-http --net mynet logstash-http
+sudo docker run --rm -it -P --name logstash-http -h logstash-http --net mynet logstash-http
 ```
 
 start log-pilot:
@@ -39,11 +39,19 @@ sudo docker run --rm -it -P --net mynet \
     -e LOGSTASH_HOST=logstash-http \
     -e LOGSTASH_PORT=5044 \
     registry.cn-hangzhou.aliyuncs.com/acs/log-pilot:0.9.5-filebeat
+
+docker run --rm -it -P --net mynet -v /var/run/docker.sock:/var/run/docker.sock -v /etc/localtime:/etc/localtime -v /:/host:ro --cap-add SYS_ADMIN -e LOGGING_OUTPUT=logstash -e LOGSTASH_HOST=logstash-http -e LOGSTASH_PORT=5044 registry.cn-hangzhou.aliyuncs.com/acs/log-pilot:0.9.5-filebeat
 ```
 
 start graft node(s):
 ```
 sudo docker run -it --rm -P --name node0 -h node0 --net mynet --label aliyun.logs.catalina=stdout  raft-demo /raftexample -id node0 ~/node0
 
-sudo docker run -it --rm -P --name node1 -h node1 --net mynet --label aliyun.logs.catalina=stdout  raft-demo /raftexample -id node1 ~/node1
+sudo docker run -it --rm -P --name node1 -h node1 --net mynet --label aliyun.logs.catalina=stdout  raft-demo /raftexample -id node1 -join node0:11000 ~/node1 
 ```
+
+now back to receiver to see logs.
+
+## TODO
+
+more awesome viz project: http://kanaka.github.io/raft.js/
