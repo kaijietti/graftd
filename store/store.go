@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
 
+	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 )
@@ -36,14 +36,14 @@ type Store struct {
 	// consensus module
 	raft *raft.Raft
 
-	logger *log.Logger
+	logger hclog.Logger
 }
 
 // New retuens a new store
 func New() *Store {
 	return &Store{
 		kv:     make(map[string]string),
-		logger: log.New(os.Stderr, "[store] ", log.LstdFlags),
+		logger: hclog.New(&hclog.LoggerOptions{Name: "store"}),
 	}
 }
 
@@ -175,11 +175,11 @@ func (s *Store) Del(key string) error {
 
 // Join joins a node
 func (s *Store) Join(nodeID, addr string) error {
-	s.logger.Printf("received join request for remote note %s at %s", nodeID, addr)
+	s.logger.Debug("received join request for remote node", "node", nodeID, "addr", addr)
 
 	configFuture := s.raft.GetConfiguration()
 	if err := configFuture.Error(); err != nil {
-		s.logger.Printf("failed to get raft configuration: %v", err)
+		s.logger.Error("failed to get raft configuration", "err", err)
 		return err
 	}
 
@@ -189,7 +189,7 @@ func (s *Store) Join(nodeID, addr string) error {
 			// However if *both* the ID and the address are the same, then nothing -- not even
 			// a join operation -- is needed.
 			if srv.Address == raft.ServerAddress(addr) && srv.ID == raft.ServerID(nodeID) {
-				s.logger.Printf("node %s at %s already member of cluster, ignoring join request", nodeID, addr)
+				s.logger.Info("node already member of cluster, ignoring join request", "node", nodeID, "addr", addr)
 				return nil
 			}
 
@@ -204,7 +204,7 @@ func (s *Store) Join(nodeID, addr string) error {
 	if f.Error() != nil {
 		return f.Error()
 	}
-	s.logger.Printf("node %s at %s joined successfully", nodeID, addr)
+	s.logger.Info("node joined successfully", "node", nodeID, "addr", addr)
 	return nil
 }
 
@@ -213,15 +213,22 @@ type fsm Store
 func (f *fsm) Apply(l *raft.Log) interface{} {
 	var c command
 	if err := json.Unmarshal(l.Data, &c); err != nil {
-		log.Panicf(fmt.Sprintf("failed to unmarshal command: %s", err.Error()))
+		f.logger.Error("failed to unmarshal command", "err", err)
+		panic(err)
 	}
 	switch c.Op {
 	case "set":
-		return f.applySet(c.Key, c.Value)
+		f.logger.Info("applying log", "command", fmt.Sprintf("SET <%v, %v>", c.Key, c.Value))
+		ret := f.applySet(c.Key, c.Value)
+		f.logger.Info("applied log", "command", fmt.Sprintf("SET <%v, %v>", c.Key, c.Value))
+		return ret
 	case "delete":
-		return f.applyDel(c.Key)
+		f.logger.Info("applying log", "command", fmt.Sprintf("DEL <%v>", c.Key))
+		ret := f.applyDel(c.Key)
+		f.logger.Info("applied log", "command", fmt.Sprintf("DEL <%v>", c.Key))
+		return ret
 	default:
-		log.Panicf(fmt.Sprintf("unrecognized command op: %s", c.Op))
+		f.logger.Warn("unrecognized op", "command", c.Op)
 	}
 
 	return nil
@@ -244,22 +251,25 @@ func (f *fsm) applyDel(key string) interface{} {
 func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-
+	f.logger.Info("snapshotting: clone the map")
 	// clone the map
 	o := make(map[string]string)
 	for k, v := range f.kv {
 		o[k] = v
 	}
+	f.logger.Info("snapshot done: clone the map")
 	return &fsmSnapshot{store: o}, nil
 }
 
 func (f *fsm) Restore(rc io.ReadCloser) error {
+	f.logger.Info("restoring: unmarshal the jsonStr")
 	o := make(map[string]string)
 	if err := json.NewDecoder(rc).Decode(&o); err != nil {
 		return err
 	}
 
 	f.kv = o
+	f.logger.Info("restore done: unmarshal the jsonStr")
 	return nil
 }
 

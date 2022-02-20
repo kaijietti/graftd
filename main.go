@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/hashicorp/go-hclog"
 	"log"
 	"net/http"
 	"os"
@@ -26,6 +27,9 @@ var (
 	raftAddr string
 	joinAddr string
 	nodeID   string
+	logger   = hclog.New(&hclog.LoggerOptions{
+		Name: "graftd",
+	})
 )
 
 func init() {
@@ -40,8 +44,6 @@ func init() {
 }
 
 func main() {
-	fmt.Println("hello world")
-	fmt.Println(DefaultRaftAddr)
 
 	flag.Parse()
 
@@ -75,21 +77,23 @@ func main() {
 		}
 	}
 
-	log.Println("hraftd started successfully")
+	logger.Info("started successfully!")
 
 	terminate := make(chan os.Signal, 1)
 	signal.Notify(terminate, os.Interrupt)
 	<-terminate
-	log.Println("hraftd exiting")
+	logger.Info("exited successfully")
 }
 
 func join(joinAddr, raftAddr, nodeID string) error {
 	b, err := json.Marshal(map[string]string{"addr": raftAddr, "id": nodeID})
 	if err != nil {
+		logger.Error("found err when marshalling join request", "err", err)
 		return err
 	}
 	resp, err := http.Post(fmt.Sprintf("http://%s/join", joinAddr), "application-type/json", bytes.NewReader(b))
 	if err != nil {
+		logger.Error("found err when sending join request to node", "node", nodeID, "addr", raftAddr, "err", err)
 		return err
 	}
 	defer resp.Body.Close()
