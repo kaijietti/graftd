@@ -23,6 +23,22 @@ start receiver:
 sudo docker run --rm -it --name vizor --net mynet -P vizor /vizor
 ```
 
+receiver bootstrap:
+
+we need browser to view the log flow, but our host machine is not able to access container inside `mynet`.
+
+so we can first start like this:
+
+```
+docker run --rm -it --name vizor -p 8090:8090 vizor /vizor
+```
+
+and then according to [add-containers-to-a-network](https://docs.docker.com/engine/tutorials/networkingcontainers/#add-containers-to-a-network):
+
+```
+docker network connect mynet vizor
+```
+
 start logstash:
 ```
 sudo docker run --rm -it -P --name logstash-http -h logstash-http --net mynet logstash-http

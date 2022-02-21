@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dynamically Add or Remove Table Row Using VueJS</title>
+
+    <meta name="author" content="muni">
+    <meta name="description" content="vue js dynamic table, vuejs dynamically add input">
+    <meta name="keywords" content="vue js dynamic table, vuejs dynamically add input">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt"
+          crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.js"></script>
+    <style>
+        body{
+            /* font-family: 'Ubuntu', sans-serif; */
+            font-family: sans-serif;
+            font-size: 16px;
+            font-weight: 300;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div id="app">
+        <main role="main" class="mt-4">
+            <div class="row">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th class="col-1">Timestamp</th>
+                            <th class="col-3" v-for="(node, k) in nodes" :key="k" scope="col">{{node}}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(log, k) in logs" :key="k">
+<!--                                this is placeholder-->
+                            <td class="col-1">{{log.unix_timestamp}}</td>
+                            <td class="col-3" v-for="(node, j) in nodes.slice(0, log.placeholder)"></td>
+                            <td class="col-3" >
+                                {{log}}
+                            </td>
+                            <td class="col-3" v-for="(node, j) in nodes.slice(0, nodes.length - 1 - log.placeholder)"></td>
+                        </tr>
+
+                        <tr v-show="logs.length === 0">
+                            <td colspan="6">
+                                <p class="text-center alert-danger p-2">
+                                    No logs.
+                                </p>
+                            </td>
+                        </tr>
+
+                        </tbody>
+
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </main>
+    </div>
+</div>
+<script>
+    var socket = io()
+    var app = new Vue({
+        el: "#app",
+        data: {
+            logs: [],
+            nodes: []
+        },
+        created () {
+            var _this = this
+            // Receive
+            socket.on('append log', function (log) {
+                console.log(log)
+                if (!_this.nodes.includes(log.node)) {
+                    _this.nodes.push(log.node)
+                }
+                if (_this.logs.length == 0) {
+                    _this.logs.push({
+                        unix_timestamp: log.unix_timestamp,
+                        node: log.node,
+                        module: log.module,
+                        log_type: log.log_type,
+                        message: log.message,
+                        offset: log.offset,
+                        placeholder: _this.nodes.indexOf(log.node)
+                    })
+                    return
+                }
+                var idx = _this.logs.findIndex(ele => {
+                    return ele.unix_timestamp > log.unix_timestamp
+                })
+                if (idx == -1) {
+                    idx = _this.logs.length
+                }
+                _this.logs.splice(idx, 0, {
+                    unix_timestamp: log.unix_timestamp,
+                    node: log.node,
+                    module: log.module,
+                    log_type: log.log_type,
+                    message: log.message,
+                    offset: log.offset,
+                    placeholder: _this.nodes.indexOf(log.node)
+                })
+            })
+        },
+    });
+</script>
+</body>
+
+</html>

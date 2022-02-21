@@ -2,6 +2,10 @@
 
 FROM golang:1.17-alpine
 
-COPY main.go ./
+WORKDIR /work
 
-RUN go build -o /vizor main.go
+COPY . ./
+
+RUN go env -w GOPROXY="https://goproxy.io,direct"
+
+RUN go build -o /vizor
