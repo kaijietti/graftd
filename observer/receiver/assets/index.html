@@ -24,6 +24,31 @@
             font-size: 16px;
             font-weight: 300;
         }
+        .node {
+            margin: 0px;
+            padding: 0px;
+            position: relative;
+            width: auto;
+            border: solid 2px;
+            border-radius: 5px 5px 5px 5px;
+        }
+
+        .node div {
+            padding: 1px;
+            /*font-size: 0.9em;*/
+        }
+
+        .node .name {
+            border-radius: 5px 5px 0px 0px;
+            border-bottom: 1px solid;
+        }
+        .node .module {
+            float: left;
+        }
+        .node .message {
+            border-top: 1px dashed;
+            clear: both;
+        }
     </style>
 </head>
 
@@ -46,7 +71,12 @@
                             <td class="col-1">{{log.unix_timestamp}}</td>
                             <td class="col-3" v-for="(node, j) in nodes.slice(0, log.placeholder)"></td>
                             <td class="col-3" >
-                                {{log}}
+<!--                                {{log}}-->
+                                <div id="{{log.node}}" class="node">
+                                    <div class="name">{{log.node}}</div>
+                                    <div class="module">{{log.module}}</div>
+                                    <div class="message">{{log.message}}</div>
+                                </div>
                             </td>
                             <td class="col-3" v-for="(node, j) in nodes.slice(0, nodes.length - 1 - log.placeholder)"></td>
                         </tr>

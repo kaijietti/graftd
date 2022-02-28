@@ -2,6 +2,7 @@ package raft
 
 import (
 	"sync"
+	"encoding/json"
 	"sync/atomic"
 )
 
@@ -71,6 +72,23 @@ type raftState struct {
 
 	// The current state
 	state RaftState
+}
+
+func (r *raftState) String() string {
+	out, err := json.Marshal(map[string]interface{}{
+		"currentTerm": r.currentTerm,
+		"commitIndex": r.commitIndex,
+		"lastApplied": r.lastApplied,
+		"lastSnapshotIndex": r.lastSnapshotIndex,
+		"lastSnapshotTerm": r.lastSnapshotTerm,
+		"lastLogIndex": r.lastLogIndex,
+		"lastLogTerm" : r.lastLogTerm,
+		"state": r.state.String(),
+	})
+	if err != nil {
+		return err.Error()
+	}
+	return string(out)
 }
 
 func (r *raftState) getState() RaftState {

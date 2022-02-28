@@ -18,13 +18,36 @@ var allowOriginFunc = func(r *http.Request) bool {
 	return true
 }
 
+type RaftState struct {
+	// The current term, cache of StableStore
+	currentTerm uint64
+
+	// Highest committed log entry
+	commitIndex uint64
+
+	// Last applied log to the FSM
+	lastApplied uint64
+
+	// Cache the latest snapshot index/term
+	lastSnapshotIndex uint64
+	lastSnapshotTerm  uint64
+
+	// Cache the latest log from LogStore
+	lastLogIndex uint64
+	lastLogTerm  uint64
+
+	// The current state
+	state string
+}
+
 type logInfo struct {
-	Offset    int    `json:"offset"`
-	Message   string `json:"message"`
-	Node      string `json:"node"`
-	LogType   string `json:"log_type"`
-	Module    string `json:"module"`
-	Timestamp int    `json:"unix_timestamp"`
+	Offset    int       `json:"offset"`
+	Message   string    `json:"message"`
+	Node      string    `json:"node"`
+	LogType   string    `json:"log_type"`
+	Module    string    `json:"module"`
+	Timestamp int       `json:"unix_timestamp"`
+	RaftState RaftState `json:"-"`
 }
 
 func main() {
@@ -82,6 +105,9 @@ func main() {
 		if err := json.Unmarshal(body, &log); err != nil {
 			fmt.Println("ERROR")
 			return
+		}
+		if err := json.Unmarshal([]byte(log.Message), &log.RaftState); err != nil {
+
 		}
 		ch <- &log
 		fmt.Println(log)

@@ -155,6 +155,9 @@ func (r *Raft) runFollower() {
 	heartbeatTimer := randomTimeout(r.config().HeartbeatTimeout)
 
 	for r.getState() == Follower {
+
+		r.logger.Info(r.raftState.String())
+
 		select {
 		case rpc := <-r.rpcCh:
 			r.processRPC(rpc)
@@ -277,6 +280,9 @@ func (r *Raft) runCandidate() {
 	r.logger.Debug("votes", "needed", votesNeeded)
 
 	for r.getState() == Candidate {
+
+		r.logger.Info(r.raftState.String())
+
 		select {
 		case rpc := <-r.rpcCh:
 			r.processRPC(rpc)
@@ -579,6 +585,9 @@ func (r *Raft) leaderLoop() {
 	lease := time.After(r.config().LeaderLeaseTimeout)
 
 	for r.getState() == Leader {
+
+		r.logger.Info(r.raftState.String())
+
 		select {
 		case rpc := <-r.rpcCh:
 			r.processRPC(rpc)
