@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 // Easier to get running with CORS. Thanks for help @Vindexus and @erkie
@@ -18,36 +19,79 @@ var allowOriginFunc = func(r *http.Request) bool {
 	return true
 }
 
-type RaftState struct {
-	// The current term, cache of StableStore
-	currentTerm uint64
+//type RaftState struct {
+//	// The current term, cache of StableStore
+//	currentTerm uint64
+//
+//	// Highest committed log entry
+//	commitIndex uint64
+//
+//	// Last applied log to the FSM
+//	lastApplied uint64
+//
+//	// Cache the latest snapshot index/term
+//	lastSnapshotIndex uint64
+//	lastSnapshotTerm  uint64
+//
+//	// Cache the latest log from LogStore
+//	lastLogIndex uint64
+//	lastLogTerm  uint64
+//
+//	// The current state
+//	state string
+//}
 
-	// Highest committed log entry
-	commitIndex uint64
-
-	// Last applied log to the FSM
-	lastApplied uint64
-
-	// Cache the latest snapshot index/term
-	lastSnapshotIndex uint64
-	lastSnapshotTerm  uint64
-
-	// Cache the latest log from LogStore
-	lastLogIndex uint64
-	lastLogTerm  uint64
-
-	// The current state
-	state string
+// logs from logstash
+type lstLog struct {
+	Node      string `json:"node"`
+	Offset    int    `json:"offset"`
+	Timestamp int    `json:"unix_timestamp"`
 }
 
 type logInfo struct {
-	Offset    int       `json:"offset"`
-	Message   string    `json:"message"`
-	Node      string    `json:"node"`
-	LogType   string    `json:"log_type"`
-	Module    string    `json:"module"`
-	Timestamp int       `json:"unix_timestamp"`
-	RaftState RaftState `json:"-"`
+	lstLog
+	Message string `json:"message"`
+}
+
+// logstashLog.message is hc-log json
+type moduleLog struct {
+	lstLog
+	Caller  string                 `json:"caller"`
+	Level   string                 `json:"level"`
+	Module  string                 `json:"module"`
+	Message string                 `json:"message"`
+	Extend  map[string]interface{} `json:"extend"`
+}
+
+func (m *moduleLog) ConvertFrom(lf *logInfo) {
+
+	extend := make(map[string]interface{})
+
+	unescapedStr := strings.ReplaceAll(lf.Message, "\\\"", "\"")
+	if err := json.Unmarshal([]byte(unescapedStr), &extend); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// basic info
+	m.Node = lf.Node
+	m.Offset = lf.Offset
+	m.Timestamp = lf.Timestamp
+
+	// hc-log info
+	m.Caller = extend["@caller"].(string)
+	m.Level = extend["@level"].(string)
+	m.Module = extend["@module"].(string)
+	m.Message = extend["@message"].(string)
+
+	// delete some keys
+	delete(extend, "@caller")
+	delete(extend, "@level")
+	delete(extend, "@module")
+	delete(extend, "@message")
+	delete(extend, "@timestamp")
+
+	m.Extend = extend
 }
 
 func main() {
@@ -62,7 +106,7 @@ func main() {
 		},
 	})
 
-	ch := make(chan *logInfo, 10)
+	ch := make(chan *moduleLog, 10)
 
 	server.OnConnect("/", func(s socketio.Conn) error {
 		s.SetContext("")
@@ -101,16 +145,22 @@ func main() {
 			return
 		}
 		body, _ := ioutil.ReadAll(req.Body)
+
+		fmt.Printf("lst-log: %v\n", string(body))
+
 		log := logInfo{}
 		if err := json.Unmarshal(body, &log); err != nil {
-			fmt.Println("ERROR")
+			fmt.Println(err)
 			return
 		}
-		if err := json.Unmarshal([]byte(log.Message), &log.RaftState); err != nil {
+		fmt.Printf("raw-log: %+v\n", log)
 
-		}
-		ch <- &log
-		fmt.Println(log)
+		hlog := &moduleLog{}
+		hlog.ConvertFrom(&log)
+
+		fmt.Printf("module-log: %+v\n\n", *hlog)
+
+		ch <- hlog
 	})
 
 	log.Println("Serving at localhost:8090...")

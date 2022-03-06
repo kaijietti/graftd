@@ -42,8 +42,12 @@ type Store struct {
 // New retuens a new store
 func New() *Store {
 	return &Store{
-		kv:     make(map[string]string),
-		logger: hclog.New(&hclog.LoggerOptions{Name: "store"}),
+		kv: make(map[string]string),
+		logger: hclog.New(&hclog.LoggerOptions{
+			Name:            "store",
+			JSONFormat:      true,
+			IncludeLocation: true,
+		}),
 	}
 }
 

@@ -91,6 +91,19 @@ func (r *raftState) String() string {
 	return string(out)
 }
 
+func (r *raftState) GetExportedState() map[string]interface{} {
+	return map[string]interface{}{
+		"currentTerm": r.currentTerm,
+		"commitIndex": r.commitIndex,
+		"lastApplied": r.lastApplied,
+		"lastSnapshotIndex": r.lastSnapshotIndex,
+		"lastSnapshotTerm": r.lastSnapshotTerm,
+		"lastLogIndex": r.lastLogIndex,
+		"lastLogTerm" : r.lastLogTerm,
+		"state": r.state.String(),
+	}
+}
+
 func (r *raftState) getState() RaftState {
 	stateAddr := (*uint32)(&r.state)
 	return RaftState(atomic.LoadUint32(stateAddr))

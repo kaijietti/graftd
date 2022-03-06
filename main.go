@@ -28,7 +28,9 @@ var (
 	joinAddr string
 	nodeID   string
 	logger   = hclog.New(&hclog.LoggerOptions{
-		Name: "graftd",
+		Name:            "graftd",
+		JSONFormat:      true,
+		IncludeLocation: true,
 	})
 )
 

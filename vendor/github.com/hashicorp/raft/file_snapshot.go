@@ -92,6 +92,8 @@ func NewFileSnapshotStoreWithLogger(base string, retain int, logger hclog.Logger
 			Name:   "snapshot",
 			Output: hclog.DefaultOutput,
 			Level:  hclog.DefaultLevel,
+			JSONFormat: true,
+			IncludeLocation: true,
 		})
 	}
 
