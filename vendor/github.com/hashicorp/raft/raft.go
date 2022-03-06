@@ -155,6 +155,7 @@ func (r *Raft) runFollower() {
 	heartbeatTimer := randomTimeout(r.config().HeartbeatTimeout)
 
 	for r.getState() == Follower {
+
 		select {
 		case rpc := <-r.rpcCh:
 			r.processRPC(rpc)
@@ -277,6 +278,7 @@ func (r *Raft) runCandidate() {
 	r.logger.Debug("votes", "needed", votesNeeded)
 
 	for r.getState() == Candidate {
+
 		select {
 		case rpc := <-r.rpcCh:
 			r.processRPC(rpc)
@@ -370,7 +372,7 @@ func (r *Raft) setupLeaderState() {
 // runLeader runs the FSM for a leader. Do the setup here and drop into
 // the leaderLoop for the hot loop.
 func (r *Raft) runLeader() {
-	r.logger.Info("[kaijie]entering leader state", "leader", r)
+	r.logger.Info("entering leader state", "leader", r)
 	metrics.IncrCounter([]string{"raft", "state", "leader"}, 1)
 
 	// Notify that we are the leader
@@ -579,6 +581,9 @@ func (r *Raft) leaderLoop() {
 	lease := time.After(r.config().LeaderLeaseTimeout)
 
 	for r.getState() == Leader {
+
+		r.logger.Info("leader loop", "raft-state", r.raftState.GetExportedState())
+
 		select {
 		case rpc := <-r.rpcCh:
 			r.processRPC(rpc)
@@ -1251,9 +1256,13 @@ func (r *Raft) processRPC(rpc RPC) {
 
 	switch cmd := rpc.Command.(type) {
 	case *AppendEntriesRequest:
+		r.logger.Info("before AppendEntriesRequest", "raft-state", r.raftState.GetExportedState())
 		r.appendEntries(rpc, cmd)
+		r.logger.Info("after AppendEntriesRequest", "raft-state", r.raftState.GetExportedState())
 	case *RequestVoteRequest:
+		r.logger.Info("before RequestVoteRequest", "raft-state", r.raftState.GetExportedState())
 		r.requestVote(rpc, cmd)
+		r.logger.Info("after RequestVoteRequest", "raft-state", r.raftState.GetExportedState())
 	case *InstallSnapshotRequest:
 		r.installSnapshot(rpc, cmd)
 	case *TimeoutNowRequest:

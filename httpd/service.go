@@ -29,9 +29,13 @@ type Service struct {
 // New returns an uninitialized HTTP service
 func New(addr string, store Store) *Service {
 	return &Service{
-		addr:   addr,
-		store:  store,
-		logger: hclog.New(&hclog.LoggerOptions{Name: "graftd-http"}),
+		addr:  addr,
+		store: store,
+		logger: hclog.New(&hclog.LoggerOptions{
+			Name:            "graftd-http",
+			JSONFormat:      true,
+			IncludeLocation: true,
+		}),
 	}
 }
 

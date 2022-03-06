@@ -474,6 +474,8 @@ func NewRaft(conf *Config, fsm FSM, logs LogStore, stable StableStore, snaps Sna
 			Name:   "raft",
 			Level:  hclog.LevelFromString(conf.LogLevel),
 			Output: conf.LogOutput,
+			JSONFormat: true,
+			IncludeLocation: true,
 		})
 	}
 

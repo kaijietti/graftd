@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Dynamically Add or Remove Table Row Using VueJS</title>
+    <title>Raft logs vizor</title>
 
     <meta name="author" content="muni">
     <meta name="description" content="vue js dynamic table, vuejs dynamically add input">
@@ -24,6 +24,55 @@
             font-size: 16px;
             font-weight: 300;
         }
+        .node {
+            margin: 0px;
+            padding: 0px;
+            position: relative;
+            width: auto;
+            border: solid 1px;
+            border-radius: 2px 2px 2px 2px;
+        }
+
+        .node div {
+            padding: 1px;
+            /*font-size: 0.9em;*/
+        }
+
+        .node .name {
+            border-bottom: 1px dashed;
+            background: #89d2a2;
+        }
+        .node .caller {
+            border-bottom: 1px dashed;
+            background: rgb(124, 178, 222);
+        }
+        .node .message {
+            border-bottom: 1px dashed;
+            clear: both;
+            background: #5fc482;
+        }
+        .node .extend {
+            background: #44ad68;
+        }
+
+        /*module background*/
+        .node .mod-graftd {
+            background: rgb(172, 125, 203);
+            border-bottom: 1px dashed;
+        }
+        .node .mod-graftd-http {
+            background: rgb(213, 109, 153);
+            border-bottom: 1px dashed;
+        }
+        .node .mod-store {
+            background: rgb(124, 222, 211);
+            border-bottom: 1px dashed;
+        }
+        .node .mod-raft {
+            background: rgb(154, 171, 239);
+            border-bottom: 1px dashed;
+        }
+
     </style>
 </head>
 
@@ -46,7 +95,14 @@
                             <td class="col-1">{{log.unix_timestamp}}</td>
                             <td class="col-3" v-for="(node, j) in nodes.slice(0, log.placeholder)"></td>
                             <td class="col-3" >
-                                {{log}}
+<!--                                {{log}}-->
+                                <div class="node">
+                                    <div class="caller">{{log.caller}}</div>
+                                    <div :class="`mod-${log.module}`">{{log.module}}</div>
+                                    <div class="name">{{log.node}}</div>
+                                    <div class="message">{{log.message}}</div>
+                                    <div class="extend">{{log.extend}}</div>
+                                </div>
                             </td>
                             <td class="col-3" v-for="(node, j) in nodes.slice(0, nodes.length - 1 - log.placeholder)"></td>
                         </tr>
@@ -89,9 +145,11 @@
                         unix_timestamp: log.unix_timestamp,
                         node: log.node,
                         module: log.module,
-                        log_type: log.log_type,
+                        level: log.level,
                         message: log.message,
                         offset: log.offset,
+                        caller: log["caller"],
+                        extend: log["extend"],
                         placeholder: _this.nodes.indexOf(log.node)
                     })
                     return
@@ -106,9 +164,11 @@
                     unix_timestamp: log.unix_timestamp,
                     node: log.node,
                     module: log.module,
-                    log_type: log.log_type,
+                    level: log.level,
                     message: log.message,
                     offset: log.offset,
+                    caller: log["caller"],
+                    extend: log["extend"],
                     placeholder: _this.nodes.indexOf(log.node)
                 })
             })

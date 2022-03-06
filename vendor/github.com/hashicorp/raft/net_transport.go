@@ -152,6 +152,8 @@ func NewNetworkTransportWithConfig(
 			Name:   "raft-net",
 			Output: hclog.DefaultOutput,
 			Level:  hclog.DefaultLevel,
+			JSONFormat: true,
+			IncludeLocation: true,
 		})
 	}
 	trans := &NetworkTransport{
@@ -190,6 +192,8 @@ func NewNetworkTransport(
 		Name:   "raft-net",
 		Output: logOutput,
 		Level:  hclog.DefaultLevel,
+		JSONFormat: true,
+		IncludeLocation: true,
 	})
 	config := &NetworkTransportConfig{Stream: stream, MaxPool: maxPool, Timeout: timeout, Logger: logger}
 	return NewNetworkTransportWithConfig(config)
