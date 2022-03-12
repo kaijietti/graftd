@@ -29,6 +29,18 @@ const (
 	rpcMaxPipeline = 128
 )
 
+func GetExportedRPCType(rpcType uint8) string {
+	switch rpcType {
+	case rpcAppendEntries:
+		return "rpcAppendEntries"
+	case rpcRequestVote:
+		return "rpcRequestVote"
+	case rpcInstallSnapshot:
+		return "rpcInstallSnapshot"
+	}
+	return "Error of GetExportedRPCType"
+}
+
 var (
 	// ErrTransportShutdown is returned when operations on a transport are
 	// invoked after it's been terminated.

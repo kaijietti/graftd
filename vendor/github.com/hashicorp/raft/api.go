@@ -573,6 +573,7 @@ func NewRaft(conf *Config, fsm FSM, logs LogStore, stable StableStore, snaps Sna
 	r.logger.Info("initial configuration",
 		"index", r.configurations.latestIndex,
 		"servers", hclog.Fmt("%+v", r.configurations.latest.Servers))
+	r.logger.Info("initial state", "raft-state", r.raftState.GetExportedState())
 
 	// Setup a heartbeat fast-path to avoid head-of-line
 	// blocking where possible. It MUST be safe for this

@@ -125,6 +125,10 @@ func (r *Raft) requestConfigChange(req configurationChangeRequest, timeout time.
 
 // run is a long running goroutine that runs the Raft FSM.
 func (r *Raft) run() {
+	
+	r.logger.Info("start goroutine *Raft.run", "comment",
+		"run is a long running goroutine that runs the Raft FSM.")
+	
 	for {
 		// Check if we are doing a shutdown
 		select {
@@ -582,7 +586,7 @@ func (r *Raft) leaderLoop() {
 
 	for r.getState() == Leader {
 
-		r.logger.Info("leader loop", "raft-state", r.raftState.GetExportedState())
+		//r.logger.Info("leader loop", "raft-state", r.raftState.GetExportedState())
 
 		select {
 		case rpc := <-r.rpcCh:
@@ -1280,6 +1284,9 @@ func (r *Raft) processRPC(rpc RPC) {
 func (r *Raft) processHeartbeat(rpc RPC) {
 	defer metrics.MeasureSince([]string{"raft", "rpc", "processHeartbeat"}, time.Now())
 
+	r.logger.Info("before processHeartbeat",
+		"raft-state", r.raftState.GetExportedState())
+
 	// Check if we are shutdown, just ignore the RPC
 	select {
 	case <-r.shutdownCh:
@@ -1295,6 +1302,8 @@ func (r *Raft) processHeartbeat(rpc RPC) {
 		r.logger.Error("expected heartbeat, got", "command", hclog.Fmt("%#v", rpc.Command))
 		rpc.Respond(nil, fmt.Errorf("unexpected command"))
 	}
+
+	r.logger.Info("after processHeartbeat", "raft-state", r.raftState.GetExportedState())
 }
 
 // appendEntries is invoked when we get an append entries RPC call. This must
@@ -1311,11 +1320,18 @@ func (r *Raft) appendEntries(rpc RPC, a *AppendEntriesRequest) {
 	}
 	var rpcErr error
 	defer func() {
+		r.logger.Info("Resp the AppendEntriesRequest",
+			"resp", resp, "rpcErr", rpcErr)
 		rpc.Respond(resp, rpcErr)
 	}()
 
+	r.logger.Info("Come the AppendEntriesRequest", "details", a.GetExportedRequest())
+
 	// Ignore an older term
 	if a.Term < r.getCurrentTerm() {
+		r.logger.Warn("Ignore an older term",
+			"termInAppendEntriesReq", a.Term,
+			"currentTerm", r.getCurrentTerm())
 		return
 	}
 
@@ -1326,6 +1342,13 @@ func (r *Raft) appendEntries(rpc RPC, a *AppendEntriesRequest) {
 		r.setState(Follower)
 		r.setCurrentTerm(a.Term)
 		resp.Term = a.Term
+		if a.Term > r.getCurrentTerm() {
+			r.logger.Warn("Increase the term if we see a newer one.",
+				"termInAppendEntriesReq", a.Term,
+				"currentTerm", r.getCurrentTerm())
+		} else if r.getState() != Follower {
+			r.logger.Warn("Transition to follower if we ever get an appendEntries call.")
+		}
 	}
 
 	// Save the current leader

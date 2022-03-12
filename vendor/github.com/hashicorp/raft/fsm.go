@@ -67,6 +67,10 @@ type FSMSnapshot interface {
 // to the FSM. This is done async of other logs since we don't want
 // the FSM to block our internal operations.
 func (r *Raft) runFSM() {
+
+	r.logger.Info("start goroutine *Raft.runFSM", "comment",
+		"runFSM is a long running goroutine responsible for applying logs to the FSM.")
+
 	var lastIndex, lastTerm uint64
 
 	batchingFSM, batchingEnabled := r.fsm.(BatchingFSM)

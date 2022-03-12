@@ -40,6 +40,25 @@ func (r *AppendEntriesRequest) GetRPCHeader() RPCHeader {
 	return r.RPCHeader
 }
 
+func (r *AppendEntriesRequest) GetExportedRequest() map[string]interface{} {
+	return map[string]interface{}{
+		"Term": r.Term,
+		"Leader": ServerAddress(r.Leader),
+		"PrevLogEntry": r.PrevLogEntry,
+		"PrevLogTerm": r.PrevLogTerm,
+		"LeaderCommitIndex": r.LeaderCommitIndex,
+		"Entries": GetExportedEntries(r.Entries),
+	}
+}
+
+func GetExportedEntries(ens []*Log) []map[string]interface{} {
+	ret := make([]map[string]interface{}, 0)
+	for _, log := range ens {
+		ret = append(ret, log.GetExportedLog())
+	}
+	return ret
+}
+
 // AppendEntriesResponse is the response returned from an
 // AppendEntriesRequest.
 type AppendEntriesResponse struct {

@@ -67,6 +67,11 @@ type SnapshotSink interface {
 // new snapshots of the FSM. It runs in parallel to the FSM and
 // main goroutines, so that snapshots do not block normal operation.
 func (r *Raft) runSnapshots() {
+
+	r.logger.Info("start goroutine *Raft.runSnapshots", "comment",
+		"runSnapshots is a long running goroutine used to manage taking new snapshots of the FSM. " +
+		"It runs in parallel to the FSM and main goroutines, so that snapshots do not block normal operation.")
+
 	for {
 		select {
 		case <-randomTimeout(r.config().SnapshotInterval):

@@ -57,7 +57,7 @@ func (s *Store) Open(bootStrap bool, localID string) error {
 	config := raft.DefaultConfig()
 	config.LocalID = raft.ServerID(localID)
 
-	// debuging
+	// debugging
 	config.HeartbeatTimeout = 10000 * time.Millisecond
 	config.ElectionTimeout = 10000 * time.Millisecond
 	config.CommitTimeout = 500 * time.Millisecond

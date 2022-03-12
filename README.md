@@ -31,12 +31,12 @@ sudo docker network create --driver bridge --subnet 192.168.0.0/16 --gateway 192
 start a leader node:
 
 ```shell
-sudo sudo docker run -it -P --name node0 -h node0 --net mynet raft-demo /raftexample -id node0 ~/node0
+sudo sudo docker run -it -P --name node0 -h node0 --net mynet raft-demo /raftnode -id node0 ~/node0
 ```
 
 start client:
 ```shell
-sudo docker run -it --name raft-cli -h raft-cli --net mynet raft-client bash
+sudo docker run -it --rm --name raft-cli -h raft-cli --net mynet raft-client bash
 ```
 
 make request (inside client):
@@ -51,9 +51,9 @@ root@raft-cli:/# curl http://node0:11000/key/user
 key: use `join` parameter to join a new follower node to a leader node
 
 ```shell
-sudo sudo docker run -it -P --name node1 -h node1 --net mynet raft-demo /raftexample -id node1 -join nodew:11000 ~/node1
+sudo sudo docker run -it -P --name node1 -h node1 --net mynet raft-demo /raftnode -id node1 -join nodew:11000 ~/node1
 
-sudo sudo docker run -it -P --name node2 -h node2 --net mynet raft-demo /raftexample -id node2 -join nodew:11000 ~/node2
+sudo sudo docker run -it -P --name node2 -h node2 --net mynet raft-demo /raftnode -id node2 -join nodew:11000 ~/node2
 ```
 
 ## logs aggr & viz
@@ -79,6 +79,18 @@ container_x log ----
 how to combine logs?
 
 see [observer](./observer/README.md)
+
+how to view logs?
+
+```shell
+.\build.bat
+.\run.bat
+# open http://localhost:8090
+# run node(s) or stop node(s)
+# view logs
+# stop
+.\stop.bat
+```
 
 
 ## test something

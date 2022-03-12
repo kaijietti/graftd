@@ -397,6 +397,10 @@ func (r *Raft) heartbeat(s *followerReplication, stopCh chan struct{}) {
 		peer := s.peer
 		s.peerLock.RUnlock()
 
+		r.logger.Info("Send heartbeat to peer",
+			"peer", peer,
+			"request", req.GetExportedRequest())
+
 		start := time.Now()
 		if err := r.trans.AppendEntries(peer.ID, peer.Address, &req, &resp); err != nil {
 			r.logger.Error("failed to heartbeat to", "peer", peer.Address, "error", err)
@@ -499,6 +503,7 @@ func (r *Raft) pipelineSend(s *followerReplication, p AppendPipeline, nextIdx *u
 	}
 
 	// Pipeline the append entries
+	r.logger.Info("pipelineSend AppendEntriesRequest", "request", req.GetExportedRequest())
 	if _, err := p.AppendEntries(req, new(AppendEntriesResponse)); err != nil {
 		r.logger.Error("failed to pipeline appendEntries", "peer", s.peer, "error", err)
 		return true

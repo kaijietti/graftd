@@ -354,6 +354,7 @@ func (l intLogger) jsonMapEntry(t time.Time, level Level, msg string) map[string
 		"@message":   msg,
 		"@timestamp": t.Format("2006-01-02T15:04:05.000000Z07:00"),
 	}
+	vals["@timestamp"] = strconv.FormatInt(t.UnixNano(), 10)
 
 	var levelStr string
 	switch level {

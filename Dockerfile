@@ -8,4 +8,4 @@ COPY . ./
 
 RUN go env -w GOPROXY="https://goproxy.io,direct"
 
-RUN go build -mod vendor -o /raftexample
+RUN go build -mod vendor -o /raftnode

@@ -43,9 +43,9 @@ var allowOriginFunc = func(r *http.Request) bool {
 
 // logs from logstash
 type lstLog struct {
-	Node      string `json:"node"`
-	Offset    int    `json:"offset"`
-	Timestamp int    `json:"unix_timestamp"`
+	Node   string `json:"node"`
+	Offset int    `json:"offset"`
+	//Timestamp string `json:"unix_timestamp"`
 }
 
 type logInfo struct {
@@ -56,11 +56,12 @@ type logInfo struct {
 // logstashLog.message is hc-log json
 type moduleLog struct {
 	lstLog
-	Caller  string                 `json:"caller"`
-	Level   string                 `json:"level"`
-	Module  string                 `json:"module"`
-	Message string                 `json:"message"`
-	Extend  map[string]interface{} `json:"extend"`
+	Caller        string                 `json:"caller"`
+	TimestampNano string                 `json:"unix_timestamp"`
+	Level         string                 `json:"level"`
+	Module        string                 `json:"module"`
+	Message       string                 `json:"message"`
+	Extend        map[string]interface{} `json:"extend"`
 }
 
 func (m *moduleLog) ConvertFrom(lf *logInfo) {
@@ -76,13 +77,14 @@ func (m *moduleLog) ConvertFrom(lf *logInfo) {
 	// basic info
 	m.Node = lf.Node
 	m.Offset = lf.Offset
-	m.Timestamp = lf.Timestamp
+	//m.Timestamp = lf.Timestamp
 
 	// hc-log info
 	m.Caller = extend["@caller"].(string)
 	m.Level = extend["@level"].(string)
 	m.Module = extend["@module"].(string)
 	m.Message = extend["@message"].(string)
+	m.TimestampNano = extend["@timestamp"].(string)
 
 	// delete some keys
 	delete(extend, "@caller")
@@ -157,6 +159,7 @@ func main() {
 
 		hlog := &moduleLog{}
 		hlog.ConvertFrom(&log)
+		//hlog.Timestamp = hlog.TimestampNano
 
 		fmt.Printf("module-log: %+v\n\n", *hlog)
 

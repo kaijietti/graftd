@@ -3,6 +3,7 @@ package raft
 import (
 	"fmt"
 	"time"
+	"encoding/json"
 
 	metrics "github.com/armon/go-metrics"
 )
@@ -173,4 +174,25 @@ func emitLogStoreMetrics(s LogStore, prefix []string, interval time.Duration, st
 			return
 		}
 	}
+}
+
+func (l *Log) GetExportedLog() map[string]interface{} {
+
+	ret := map[string]interface{}{
+		"Index": l.Index,
+		"Term": l.Term,
+		"Type": l.Type.String(),
+		"Extensions": l.Extensions,
+		"AppendedAt": l.AppendedAt,
+	}
+
+	if l.Type == LogConfiguration {
+		ret["Data"] = DecodeConfiguration(l.Data)
+	} else {
+		lData := make(map[string]interface{})
+		json.Unmarshal(l.Data, &lData)
+		ret["Data"] = lData
+	}
+
+	return ret
 }
