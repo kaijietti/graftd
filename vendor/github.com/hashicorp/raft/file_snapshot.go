@@ -128,6 +128,8 @@ func NewFileSnapshotStore(base string, retain int, logOutput io.Writer) (*FileSn
 		Name:   "snapshot",
 		Output: logOutput,
 		Level:  hclog.DefaultLevel,
+		JSONFormat: true,
+		IncludeLocation: true,
 	}))
 }
 

@@ -1268,7 +1268,9 @@ func (r *Raft) processRPC(rpc RPC) {
 		r.requestVote(rpc, cmd)
 		r.logger.Info("after RequestVoteRequest", "raft-state", r.raftState.GetExportedState())
 	case *InstallSnapshotRequest:
+		r.logger.Info("before InstallSnapshotRequest", "raft-state", r.raftState.GetExportedState())
 		r.installSnapshot(rpc, cmd)
+		r.logger.Info("after InstallSnapshotRequest", "raft-state", r.raftState.GetExportedState())
 	case *TimeoutNowRequest:
 		r.timeoutNow(rpc, cmd)
 	default:

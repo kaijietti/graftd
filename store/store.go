@@ -60,8 +60,10 @@ func (s *Store) Open(bootStrap bool, localID string) error {
 	// debugging
 	config.HeartbeatTimeout = 10000 * time.Millisecond
 	config.ElectionTimeout = 10000 * time.Millisecond
-	config.CommitTimeout = 500 * time.Millisecond
+	config.CommitTimeout = 5000 * time.Millisecond
 	config.SnapshotInterval = 120 * time.Second
+	config.SnapshotThreshold = 10
+	config.TrailingLogs = 10
 	config.LeaderLeaseTimeout = 5000 * time.Millisecond
 
 	// setup raft communication
@@ -261,7 +263,7 @@ func (f *fsm) Snapshot() (raft.FSMSnapshot, error) {
 	for k, v := range f.kv {
 		o[k] = v
 	}
-	f.logger.Info("snapshot done: clone the map")
+	f.logger.Info("snapshot done: clone the map", "map", o)
 	return &fsmSnapshot{store: o}, nil
 }
 
@@ -273,7 +275,7 @@ func (f *fsm) Restore(rc io.ReadCloser) error {
 	}
 
 	f.kv = o
-	f.logger.Info("restore done: unmarshal the jsonStr")
+	f.logger.Info("restore done: unmarshal the jsonStr", "map", o)
 	return nil
 }
 

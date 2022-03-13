@@ -19,28 +19,6 @@ var allowOriginFunc = func(r *http.Request) bool {
 	return true
 }
 
-//type RaftState struct {
-//	// The current term, cache of StableStore
-//	currentTerm uint64
-//
-//	// Highest committed log entry
-//	commitIndex uint64
-//
-//	// Last applied log to the FSM
-//	lastApplied uint64
-//
-//	// Cache the latest snapshot index/term
-//	lastSnapshotIndex uint64
-//	lastSnapshotTerm  uint64
-//
-//	// Cache the latest log from LogStore
-//	lastLogIndex uint64
-//	lastLogTerm  uint64
-//
-//	// The current state
-//	state string
-//}
-
 // logs from logstash
 type lstLog struct {
 	Node   string `json:"node"`

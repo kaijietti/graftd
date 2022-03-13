@@ -61,9 +61,9 @@ docker run --rm -it -P --net mynet -v /var/run/docker.sock:/var/run/docker.sock 
 
 start graft node(s):
 ```
-sudo docker run -it --rm -P --name node0 -h node0 --net mynet --label aliyun.logs.catalina=stdout  raft-demo /raftnode -id node0 ~/node0
+sudo docker run -it --rm -P --cap-add=NET_ADMIN --name node0 -h node0 --net mynet --label aliyun.logs.catalina=stdout  raft-demo /raftnode -id node0 ~/node0
 
-sudo docker run -it --rm -P --name node1 -h node1 --net mynet --label aliyun.logs.catalina=stdout  raft-demo /raftnode -id node1 -join node0:11000 ~/node1 
+sudo docker run -it --rm -P --cap-add=NET_ADMIN --name node1 -h node1 --net mynet --label aliyun.logs.catalina=stdout  raft-demo /raftnode -id node1 -join node0:11000 ~/node1 
 ```
 
 now back to receiver to see logs.

@@ -77,13 +77,20 @@ func (r *Raft) runSnapshots() {
 		case <-randomTimeout(r.config().SnapshotInterval):
 			// Check if we should snapshot
 			if !r.shouldSnapshot() {
+				r.logger.Info("need not to snapshot")
 				continue
 			}
+			r.logger.Info("need to snapshot",
+				"snapshotThreshold", r.config().SnapshotThreshold)
 
+			r.logger.Info("before Snapshotting",
+				"raft-state", r.raftState.GetExportedState())
 			// Trigger a snapshot
 			if _, err := r.takeSnapshot(); err != nil {
 				r.logger.Error("failed to take snapshot", "error", err)
 			}
+			r.logger.Info("after Snapshotting",
+				"raft-state", r.raftState.GetExportedState())
 
 		case future := <-r.userSnapshotCh:
 			// User-triggered, run immediately
