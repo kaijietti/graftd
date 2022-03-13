@@ -1,62 +1,53 @@
 # graftd
 
-## build demo 
+## 0. Environment Info
+System: Ubuntu 21.04
+Docker Version: 20.10.12
+Go Version: 1.17.8
 
-build raft-backend key-value store:
+## 1. Build images
 
+We have 4 images to build, 1 image to pull:
 ```shell
-git clone https://github.com/kaijietti/graftd.git
-cd ./graftd
-sudo docker build --tag raft-demo .
+# name: raft-demo 
+# [a distributed kv-store]
+# file:/graftd/Dockerfile 
+
+# name: raft-client 
+# [a kv-store client with curl]
+# /graftd/client/Dockerfile
+
+# name: logstash-http 
+# [a pipeline that forward logs from log-pilot to custom vizor]
+# /graftd/observer/logstash/Dockerfile
+
+# name: vizor
+# [a basic log visualization in form of table]
+# /graftd/observer/receiver/Dockerfile
+
+# name: log-pilot
+# [a tool that can gather multiple containers' log]
+# registry.cn-hangzhou.aliyuncs.com/acs/log-pilot:0.9.5-filebeat
 ```
 
-build client(TODO: cli now is simply a curl tool):
+you can build these by running:
 
 ```shell
-# git clone https://github.com/kaijietti/graftd.git
-cd ./graftd/client
-sudo docker build --tag raft-client .
+cd ./scripts
+./build.sh
 ```
 
-## run demo
+## 2. Run demo
 
-create a network first:
+create a network named mynet first:
 
 ```shell
 sudo docker network create --driver bridge --subnet 192.168.0.0/16 --gateway 192.168.0.1 mynet
 ```
 
-### bootstrap fisrt node
+### 2.1. start log vizor
 
-start a leader node:
-
-```shell
-sudo sudo docker run -it -P --name node0 -h node0 --net mynet raft-demo /raftnode -id node0 ~/node0
-```
-
-start client:
-```shell
-sudo docker run -it --rm --name raft-cli -h raft-cli --net mynet raft-client bash
-```
-
-make request (inside client):
-```
-root@raft-cli:/# curl -XPOST http://node0:11000/key -d '{"user":"kj"}'
-root@raft-cli:/# curl http://node0:11000/key/user                     
-{"user":"kj"}
-```
-
-### make cluster
-
-key: use `join` parameter to join a new follower node to a leader node
-
-```shell
-sudo sudo docker run -it -P --name node1 -h node1 --net mynet raft-demo /raftnode -id node1 -join nodew:11000 ~/node1
-
-sudo sudo docker run -it -P --name node2 -h node2 --net mynet raft-demo /raftnode -id node2 -join nodew:11000 ~/node2
-```
-
-## logs aggr & viz
+**how we implement vizor?**
 
 we need to modify our `hashicorp/raft` source code to add more custom logs:
 
@@ -69,39 +60,83 @@ go build -mod vendor
 logs aggr tools: https://github.com/AliyunContainerService/log-pilot
 
 ```bash
-container_1 log ----
+container_1 stdout-log ----
                     |
-container_2 log ------ log-pilot --> (logstash + plugin) --> viz consumer
+container_2 stdout-log ------ log-pilot --> (logstash + http-plugin) --> vizor as consumer
                     |
-container_x log ----
+container_x stdout-log ----
 ```
 
-how to combine logs?
-
-see [observer](./observer/README.md)
-
-how to view logs?
+**how to view logs?**
 
 ```shell
-.\build.bat
-.\run.bat
-# open http://localhost:8090
+./build.sh
+./run.sh
+# use browser to open http://localhost:8090
 # run node(s) or stop node(s)
 # view logs
-# stop
-.\stop.bat
+# if you want to stop
+./stop.sh
 ```
 
+### 2.2. start nodes
 
-## test something
+we recommend you to start 3 nodes to observer nodes' behaviours.
 
-### test node crash
+start graft node(s):
+```shell
+# start leader
+sudo docker run -it --rm -P --net mynet \
+    --cap-add=NET_ADMIN \ 
+    --name node0 -h node0 \
+    --label aliyun.logs.catalina=stdout \
+    raft-demo /raftnode -id node0 ~/node0
+# wait until node0 become leader
+# start node1
+sudo docker run -it --rm -P --net mynet \
+    --cap-add=NET_ADMIN \
+    --name node1 -h node1 \
+    --label aliyun.logs.catalina=stdout \
+    raft-demo /raftnode -id node1 -join node0:11000 ~/node1 
+# start node2
+sudo docker run -it --rm -P --net mynet \
+    --cap-add=NET_ADMIN \
+    --name node2 -h node2 \
+    --label aliyun.logs.catalina=stdout \
+    raft-demo /raftnode -id node2 -join node0:11000 ~/node2 
+```
 
-TODO
+now back to browser to see logs.
 
-### test split brain
+### 2.3. interact with nodes
 
-TODO
+#### 2.3.1 kv-store client
+
+you can start client like:
+```shell
+sudo docker run -it --rm --name raft-cli -h raft-cli --net mynet raft-client bash
+```
+
+make request (inside client):
+```
+root@raft-cli:/# curl -XPOST http://node0:11000/key -d '{"user":"kj"}'
+root@raft-cli:/# curl http://node0:11000/key/user                     
+{"user":"kj"}
+```
+
+and you can see log replication from browser vizor.
+
+#### 2.3.2 chaos test
+
+we can run chaos test in these nodes like:
+
+```shell
+# get into shell or run tc directly
+sudo docker exec -it node0 /bin/bash
+# delay
+tc qdisc add dev eth0 root netem delay 10000ms
+# or other network emulation powered by tc netem
+```
 
 ## Q&A
 
