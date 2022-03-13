@@ -87,7 +87,7 @@ start graft node(s):
 ```shell
 # start leader
 sudo docker run -it --rm -P --net mynet \
-    --cap-add=NET_ADMIN \ 
+    --cap-add=NET_ADMIN \
     --name node0 -h node0 \
     --label aliyun.logs.catalina=stdout \
     raft-demo /raftnode -id node0 ~/node0
@@ -97,13 +97,13 @@ sudo docker run -it --rm -P --net mynet \
     --cap-add=NET_ADMIN \
     --name node1 -h node1 \
     --label aliyun.logs.catalina=stdout \
-    raft-demo /raftnode -id node1 -join node0:11000 ~/node1 
+    raft-demo /raftnode -id node1 -join node0:11000 ~/node1
 # start node2
 sudo docker run -it --rm -P --net mynet \
     --cap-add=NET_ADMIN \
     --name node2 -h node2 \
     --label aliyun.logs.catalina=stdout \
-    raft-demo /raftnode -id node2 -join node0:11000 ~/node2 
+    raft-demo /raftnode -id node2 -join node0:11000 ~/node2
 ```
 
 now back to browser to see logs.
