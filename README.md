@@ -153,3 +153,7 @@ And we don't want to specify this address(raftBind Address) manually as we want 
 refs: https://github.com/hashicorp/raft/issues/280
 
 > What I saw happening was that when the new node joins it becomes a follower and then this [test](https://github.com/hashicorp/raft/blob/master/raft.go#L1072-L1075) is ran on the follower to check for conflicting log entries. This is a natural function of Raft which is used in log replication, where the leader checks the previous logs before appending any new entries. This is useful for when a follower may leave and rejoin the cluster with stale state. In this case, with a new follower, it is checking the follower’s log entries against the leader’s current log before appending any entries to the follower’s log. It sees there are no previous log entries since the follower is brand new. This triggers sending all the previous logs to the new follower. This is expected with new nodes, and not something to worry about!
+
+## an example run of vizor
+
+![](./docs/run_example_join.jpeg)

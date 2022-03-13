@@ -1,7 +1,7 @@
 sudo docker run --rm -itd --name vizor -p 8090:8090 vizor /vizor
 sudo docker network connect mynet vizor
 sudo docker run --rm -itd -P --net mynet --name logstash-http -h logstash-http logstash-http
-sudo docker run --rm -itd -P --net mynet \
+sudo docker run --rm -itd -P --net mynet --name log-pilot \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /etc/localtime:/etc/localtime \
     -v /:/host:ro \
