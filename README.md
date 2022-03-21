@@ -9,7 +9,7 @@ Go Version: 1.17.8
 
 We have 4 images to build, 1 image to pull:
 ```shell
-# name: raft-demo 
+# name: graftd 
 # [a distributed kv-store]
 # file:/graftd/Dockerfile 
 
@@ -90,20 +90,20 @@ sudo docker run -it --rm -P --net mynet \
     --cap-add=NET_ADMIN \
     --name node0 -h node0 \
     --label aliyun.logs.catalina=stdout \
-    raft-demo /raftnode -id node0 ~/node0
+    graftd /raftnode -id node0 ~/node0
 # wait until node0 become leader
 # start node1
 sudo docker run -it --rm -P --net mynet \
     --cap-add=NET_ADMIN \
     --name node1 -h node1 \
     --label aliyun.logs.catalina=stdout \
-    raft-demo /raftnode -id node1 -join node0:11000 ~/node1
+    graftd /raftnode -id node1 -join node0:11000 ~/node1
 # start node2
 sudo docker run -it --rm -P --net mynet \
     --cap-add=NET_ADMIN \
     --name node2 -h node2 \
     --label aliyun.logs.catalina=stdout \
-    raft-demo /raftnode -id node2 -join node0:11000 ~/node2
+    graftd /raftnode -id node2 -join node0:11000 ~/node2
 ```
 
 now back to browser to see logs.
