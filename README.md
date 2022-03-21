@@ -13,7 +13,7 @@ We have 4 images to build, 1 image to pull:
 # [a distributed kv-store]
 # file:/graftd/Dockerfile 
 
-# name: raft-client 
+# name: graftd-client 
 # [a kv-store client with curl]
 # /graftd/client/Dockerfile
 
@@ -114,7 +114,7 @@ now back to browser to see logs.
 
 you can start client like:
 ```shell
-sudo docker run -it --rm --name raft-cli -h raft-cli --net mynet raft-client bash
+sudo docker run -it --rm --name raft-cli -h raft-cli --net mynet graftd-client bash
 ```
 
 make request (inside client):

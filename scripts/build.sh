@@ -1,5 +1,5 @@
 cd ../client
-sudo docker build --tag raft-client .
+sudo docker build --tag graftd-client .
 cd ../observer
 cd ./logstash
 sudo docker build --tag logstash-http .
