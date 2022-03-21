@@ -7,5 +7,5 @@ cd ..
 cd .\receiver
 docker build --tag vizor .
 cd ..\..\
-docker build --tag raft-demo .
+docker build --tag graftd .
 docker pull registry.cn-hangzhou.aliyuncs.com/acs/log-pilot:0.9.5-filebeat
