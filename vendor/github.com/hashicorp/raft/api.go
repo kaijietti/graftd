@@ -478,6 +478,15 @@ func NewRaft(conf *Config, fsm FSM, logs LogStore, stable StableStore, snaps Sna
 			IncludeLocation: true,
 		})
 	}
+	logger.Info("Initializing raft", "config", map[string]interface{}{
+		"HeartbeatTimeout":   conf.HeartbeatTimeout.String(),
+		"ElectionTimeout":    conf.ElectionTimeout.String(),
+		"CommitTimeout":      conf.CommitTimeout.String(),
+		"TrailingLogs":       conf.TrailingLogs,
+		"SnapshotInterval":   conf.SnapshotInterval.String(),
+		"SnapshotThreshold":  conf.SnapshotThreshold,
+		"LeaderLeaseTimeout": conf.LeaderLeaseTimeout.String(),
+	})
 
 	// Try to restore the current term.
 	currentTerm, err := stable.GetUint64(keyCurrentTerm)

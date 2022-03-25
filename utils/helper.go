@@ -1,6 +1,11 @@
 package utils
 
-import "net"
+import (
+	"net"
+	"os"
+	"strconv"
+	"time"
+)
 
 // GetLocalIP returns the non loopback local IP of the host
 func GetLocalIP() string {
@@ -17,4 +22,24 @@ func GetLocalIP() string {
 		}
 	}
 	return ""
+}
+
+func GetEnvDurationByDefault(env string, unit time.Duration, defaultVal time.Duration) time.Duration {
+	val := os.Getenv(env)
+	if val == "" {
+		return defaultVal
+	} else {
+		ret, _ := strconv.Atoi(val)
+		return time.Duration(ret) * unit
+	}
+}
+
+func GetEnvUintByDefault(env string, defaultVal uint64) uint64 {
+	val := os.Getenv(env)
+	if val == "" {
+		return defaultVal
+	} else {
+		ret, _ := strconv.ParseUint(val, 10, 64)
+		return ret
+	}
 }

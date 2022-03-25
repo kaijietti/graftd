@@ -3,6 +3,7 @@ package store
 import (
 	"encoding/json"
 	"fmt"
+	"graftd/utils"
 	"io"
 	"net"
 	"os"
@@ -58,13 +59,13 @@ func (s *Store) Open(bootStrap bool, localID string) error {
 	config.LocalID = raft.ServerID(localID)
 
 	// debugging
-	config.HeartbeatTimeout = 10000 * time.Millisecond
-	config.ElectionTimeout = 10000 * time.Millisecond
-	config.CommitTimeout = 5000 * time.Millisecond
-	config.SnapshotInterval = 120 * time.Second
-	config.SnapshotThreshold = 10
-	config.TrailingLogs = 10
-	config.LeaderLeaseTimeout = 5000 * time.Millisecond
+	config.ElectionTimeout = utils.GetEnvDurationByDefault("ELECTION_TIMEOUT", time.Millisecond, config.ElectionTimeout)
+	config.HeartbeatTimeout = utils.GetEnvDurationByDefault("HEARTBEAT_TIMEOUT", time.Millisecond, config.HeartbeatTimeout)
+	config.LeaderLeaseTimeout = utils.GetEnvDurationByDefault("SNAPSHOT_INTERVAL", time.Millisecond, config.LeaderLeaseTimeout)
+	config.CommitTimeout = utils.GetEnvDurationByDefault("COMMIT_TIMEOUT", time.Millisecond, config.CommitTimeout)
+	config.SnapshotInterval = utils.GetEnvDurationByDefault("SNAPSHOT_INTERVAL", time.Second, config.SnapshotInterval)
+	config.SnapshotThreshold = utils.GetEnvUintByDefault("SNAPSHOT_THRESHOLD", config.SnapshotThreshold)
+	config.TrailingLogs = utils.GetEnvUintByDefault("TRAILING_LOGS", config.TrailingLogs)
 
 	// setup raft communication
 	addr, err := net.ResolveTCPAddr("tcp", s.RaftBind)
