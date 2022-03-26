@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"sync/atomic"
 	"time"
+	"os"
 
 	"github.com/hashicorp/go-hclog"
 
@@ -1260,9 +1261,14 @@ func (r *Raft) processRPC(rpc RPC) {
 
 	switch cmd := rpc.Command.(type) {
 	case *AppendEntriesRequest:
-		r.logger.Info("before AppendEntriesRequest", "raft-state", r.raftState.GetExportedState())
+		shouldLog := os.Getenv("IGNORE_EMPTY_APPEND") == "" || (len(cmd.Entries) != 0 || cmd.Term > r.getCurrentTerm())
+		if shouldLog {
+			r.logger.Info("before AppendEntriesRequest", "raft-state", r.raftState.GetExportedState())
+		}
 		r.appendEntries(rpc, cmd)
-		r.logger.Info("after AppendEntriesRequest", "raft-state", r.raftState.GetExportedState())
+		if shouldLog {
+			r.logger.Info("after AppendEntriesRequest", "raft-state", r.raftState.GetExportedState())
+		}
 	case *RequestVoteRequest:
 		r.logger.Info("before RequestVoteRequest", "raft-state", r.raftState.GetExportedState())
 		r.requestVote(rpc, cmd)
@@ -1321,13 +1327,19 @@ func (r *Raft) appendEntries(rpc RPC, a *AppendEntriesRequest) {
 		NoRetryBackoff: false,
 	}
 	var rpcErr error
+
+	shouldLog := os.Getenv("IGNORE_EMPTY_APPEND") == "" || a.Term < r.getCurrentTerm() || len(a.Entries) != 0
+
 	defer func() {
-		r.logger.Info("Resp the AppendEntriesRequest",
-			"resp", resp, "rpcErr", rpcErr)
+		if shouldLog {
+			r.logger.Info("Resp the AppendEntriesRequest",
+				"resp", resp, "rpcErr", rpcErr)
+		}
 		rpc.Respond(resp, rpcErr)
 	}()
-
-	r.logger.Info("Come the AppendEntriesRequest", "details", a.GetExportedRequest())
+	if shouldLog {
+		r.logger.Info("Come the AppendEntriesRequest", "details", a.GetExportedRequest())
+	}
 
 	// Ignore an older term
 	if a.Term < r.getCurrentTerm() {

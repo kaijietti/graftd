@@ -144,10 +144,6 @@
             var _this = this
             // Receive
             socket.on('append log', function (log) {
-                if (log.node == "node2") {
-                    console.log(log)
-                }
-                //
                 if (!_this.nodes.includes(log.node)) {
                     _this.nodes.push(log.node)
                 }

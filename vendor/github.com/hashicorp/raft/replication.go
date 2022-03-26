@@ -6,6 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"os"
 
 	"github.com/armon/go-metrics"
 )
@@ -388,7 +389,7 @@ func (r *Raft) heartbeat(s *followerReplication, stopCh chan struct{}) {
 		// Wait for the next heartbeat interval or forced notify
 		select {
 		case <-s.notifyCh:
-		case <-randomTimeout(r.config().HeartbeatTimeout / 10):
+		case <-randomTimeout(r.config().HeartbeatTimeout / 10 * 10):
 		case <-stopCh:
 			return
 		}
@@ -503,7 +504,9 @@ func (r *Raft) pipelineSend(s *followerReplication, p AppendPipeline, nextIdx *u
 	}
 
 	// Pipeline the append entries
-	r.logger.Info("pipelineSend AppendEntriesRequest", "request", req.GetExportedRequest())
+	if os.Getenv("IGNORE_EMPTY_APPEND")  == "" || len(req.Entries) != 0 {
+		r.logger.Info("pipelineSend AppendEntriesRequest", "request", req.GetExportedRequest())
+	}
 	if _, err := p.AppendEntries(req, new(AppendEntriesResponse)); err != nil {
 		r.logger.Error("failed to pipeline appendEntries", "peer", s.peer, "error", err)
 		return true
