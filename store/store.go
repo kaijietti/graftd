@@ -61,7 +61,7 @@ func (s *Store) Open(bootStrap bool, localID string) error {
 	// debugging
 	config.ElectionTimeout = utils.GetEnvDurationByDefault("ELECTION_TIMEOUT", time.Millisecond, config.ElectionTimeout)
 	config.HeartbeatTimeout = utils.GetEnvDurationByDefault("HEARTBEAT_TIMEOUT", time.Millisecond, config.HeartbeatTimeout)
-	config.LeaderLeaseTimeout = utils.GetEnvDurationByDefault("SNAPSHOT_INTERVAL", time.Millisecond, config.LeaderLeaseTimeout)
+	config.LeaderLeaseTimeout = utils.GetEnvDurationByDefault("LEADER_LEASE_TIMEOUT", time.Millisecond, config.LeaderLeaseTimeout)
 	config.CommitTimeout = utils.GetEnvDurationByDefault("COMMIT_TIMEOUT", time.Millisecond, config.CommitTimeout)
 	config.SnapshotInterval = utils.GetEnvDurationByDefault("SNAPSHOT_INTERVAL", time.Second, config.SnapshotInterval)
 	config.SnapshotThreshold = utils.GetEnvUintByDefault("SNAPSHOT_THRESHOLD", config.SnapshotThreshold)

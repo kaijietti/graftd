@@ -103,7 +103,7 @@
                 <tbody>
                 <tr v-for="(log, k) in logs" :key="k">
                     <!--                                this is placeholder-->
-                    <td class="col-1">{{log.unix_timestamp}}</td>
+                    <td class="col-1" style="overflow-wrap: anywhere;">{{log.unix_timestamp}}</td>
                     <td class="col-3" v-for="(node, j) in nodes.slice(0, log.placeholder)"></td>
                     <td class="col-3" >
                         <!--                                {{log}}-->
