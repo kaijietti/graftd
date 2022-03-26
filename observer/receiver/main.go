@@ -86,7 +86,7 @@ func main() {
 		},
 	})
 
-	ch := make(chan *moduleLog, 10)
+	ch := make(chan *moduleLog, 10000)
 
 	server.OnConnect("/", func(s socketio.Conn) error {
 		s.SetContext("")

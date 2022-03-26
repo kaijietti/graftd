@@ -74,6 +74,12 @@
             border-bottom: 1px dashed;
         }
 
+        table {
+            table-layout: fixed;
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
     </style>
 </head>
 
@@ -90,7 +96,7 @@
             <table class="table table-bordered">
                 <thead>
                 <tr>
-                    <th class="col-1">Timestamp</th>
+                    <th class="col-1" style="overflow-wrap: anywhere">Timestamp</th>
                     <th class="col-3" v-for="(node, k) in nodes" :key="k" scope="col">{{node}}</th>
                 </tr>
                 </thead>
@@ -138,7 +144,10 @@
             var _this = this
             // Receive
             socket.on('append log', function (log) {
-                console.log(log)
+                if (log.node == "node2") {
+                    console.log(log)
+                }
+                //
                 if (!_this.nodes.includes(log.node)) {
                     _this.nodes.push(log.node)
                 }
